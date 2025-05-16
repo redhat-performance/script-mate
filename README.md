@@ -16,4 +16,9 @@ Just clone the repo and source bits you care about:
 Documentation
 -------------
 
-See [docs/](docs/) directory.
+For user documentation see [docs/](docs/) directory.
+
+To regenarate the documentaion, I have used this:
+
+    git clone https://github.com/tests-always-included/tomdoc.sh.git
+    for f in $( find src/ -type f -name \*.sh ); do echo "Generating doc for $f"; tomdoc.sh/tomdoc.sh --markdown $f >docs/$( basename $f .sh ).md; done
