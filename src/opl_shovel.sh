@@ -137,6 +137,7 @@ function prow_subjob_list() {
 # $3 - Prow job run name.
 # $4 - Artifact path in Prow storage.
 # $5 - Output file name where to store the downloaded file.
+# $6 - Where in resulting JSON to store original download path (optional, not used by default)
 #
 # Returns exit code 0.
 function prow_download() {
@@ -145,10 +146,11 @@ function prow_download() {
     local run="$3"
     local path="$4"
     local out="$5"
+    local record_link="${6:-}"
     if [ -e "$out" ]; then
         debug "We already have $out, not overwriting it"
     else
-        shovel.py prow --job-name "$job" download --job-run-id $id --run-name "$run" --artifact-path "$path" --output-path "$out"
+        shovel.py prow --job-name "$job" download --job-run-id $id --run-name "$run" --artifact-path "$path" --output-path "$out" --record-link "$record_link"
         debug "Downloaded $out"
     fi
 }
