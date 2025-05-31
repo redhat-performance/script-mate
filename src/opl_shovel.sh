@@ -191,6 +191,29 @@ function horreum_upload() {
 }
 
 
+# Public: Upload given JSON file to OpenSearch/ElasticSearch.
+#
+# $1 - Status data file location.
+# $2 - Field in the JSON we should use to check if document is already there.
+#
+# This requires `ES_HOST` and `ES_INDEX` variables to be set so we know where to upload.
+#
+# Returns exit code 0.
+function opensearch_upload() {
+    local file="$1"
+    local matcher="$2"
+
+    debug "Uploading to OpenSearch: $file"
+
+    if $DRY_RUN; then
+        echo shovel.py opensearch --base-url "$ES_HOST" --index "$ES_INDEX" upload --input-file "$file" --matcher-field "$matcher"
+    else
+        shovel.py opensearch --base-url "$ES_HOST" --index "$ES_INDEX" upload --input-file "$file" --matcher-field "$matcher"
+        info "Uploaded to OpenSearch: $file"
+    fi
+}
+
+
 # Public: Upload new result to our Results Dashboard.
 #
 # $1 - Status data file location.
