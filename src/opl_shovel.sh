@@ -17,6 +17,10 @@ DASHBOARD_ES_INDEX="${DASHBOARD_ES_INDEX:-results-dashboard-data}"
 DRY_RUN="${DRY_RUN:-false}"
 
 
+# Source dependencies
+source "$( dirname $BASH_SOURCE )/logging.sh"
+
+
 # Check for required tools
 if ! type shovel.py &>/dev/null; then
     fatal "shovel.py utility not available"
@@ -180,7 +184,9 @@ function horreum_upload() {
         echo shovel.py horreum --base-url "$HORREUM_HOST" --api-token "..." result --test-name "@name" --output-file "$f" --start "@started" --end "@ended"
     else
         shovel.py horreum --base-url "$HORREUM_HOST" --api-token "$HORREUM_API_TOKEN" upload --test-name "@name" --input-file "$f" --matcher-field "$test_job_matcher" --matcher-label "$test_job_matcher_label" --start "@started" --end "@ended" --trashed --trashed-workaround-count 20
+        info "Uploaded to Horreum: $f"
         shovel.py horreum --base-url "$HORREUM_HOST" --api-token "$HORREUM_API_TOKEN" result --test-name "@name" --output-file "$f" --start "@started" --end "@ended"
+        info "Determined result from Horreum $f: $( jq -r .result $f )"
     fi
 }
 
@@ -207,6 +213,7 @@ function resultsdashboard_upload() {
         echo shovel.py resultsdashboard --base-url $ES_HOST upload --input-file "$file" --group "$group" --product "$product" --test @name --result-id @metadata.env.BUILD_ID --result @result --date @started --link @jobLink --release latest --version "$version"
     else
         shovel.py resultsdashboard --base-url $ES_HOST upload --input-file "$file" --group "$group" --product "$product" --test @name --result-id @metadata.env.BUILD_ID --result @result --date @started --link @jobLink --release latest --version "$version"
+        info "Uploaded to Results dashboard: $f"
     fi
 }
 
