@@ -239,7 +239,7 @@ function resultsdashboard_upload() {
         echo shovel.py resultsdashboard --base-url $ES_HOST upload --input-file "$file" --group "$group" --product "$product" --test @name --result-id @metadata.env.BUILD_ID --result @result --date @started --link @jobLink --release latest --version "$version"
     else
         shovel.py resultsdashboard --base-url $ES_HOST upload --input-file "$file" --group "$group" --product "$product" --test @name --result-id @metadata.env.BUILD_ID --result @result --date @started --link @jobLink --release latest --version "$version"
-        info "Uploaded to Results dashboard: $f"
+        info "Uploaded to Results dashboard: $file"
     fi
 }
 
