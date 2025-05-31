@@ -28,6 +28,12 @@ Public: Results dashboard ElasticSearch/OpenSearch index name
 Public: Whether to do writes to remote systems or just skip them
 
 
+`DEBUG`
+-------
+
+Public: Whether to print debugging output
+
+
 `check_json()`
 --------------
 
@@ -109,6 +115,8 @@ Public: Upload JSON data file to Horreum if it is not there already.
 * $1 - Status data file name (JSON file).
 * $2 - Key name from the JSON file we will use to check if this file is already ther in the Horreum.
 * $3 - Horreum label name that corresponds with previous parameter on a Horreum side.
+* $4 - Team owning the test in Horreum (optional, "rhtap-perf-test-team" by default).
+* $5 - Result access setting in Horreum (optional, "PUBLIC" by default).
 
 Returns exit code 0 and prints job IDs, one a line.
 
