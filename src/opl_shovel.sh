@@ -16,6 +16,9 @@ DASHBOARD_ES_INDEX="${DASHBOARD_ES_INDEX:-results-dashboard-data}"
 # Public: Whether to do writes to remote systems or just skip them
 DRY_RUN="${DRY_RUN:-false}"
 
+# Public: Whether to print debugging output
+DEBUG="${DEBUG:-false}"
+
 
 # Source dependencies
 source "$( dirname $BASH_SOURCE )/logging.sh"
@@ -48,7 +51,7 @@ function check_json() {
         return 0
     else
         error "File is not a valid JSON, removing it and skipping further processing"
-        head "$f"
+        $DEBUG && head "$f"
         rm -f "$f"
         return 1
     fi
@@ -155,7 +158,7 @@ function prow_download() {
         debug "We already have $out, not overwriting it"
     else
         shovel.py prow --job-name "$job" download --job-run-id $id --run-name "$run" --artifact-path "$path" --output-path "$out" --record-link "$record_link"
-        debug "Downloaded $out"
+        info "Downloaded from Prow: $out"
     fi
 }
 
