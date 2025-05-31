@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Helpers for shovel.py tool from OPL and for working with status data JSONs
 # https://github.com/redhat-performance/opl/blob/main/opl/shovel.py
 
@@ -21,7 +23,7 @@ DEBUG="${DEBUG:-false}"
 
 
 # Source dependencies
-source "$( dirname $BASH_SOURCE )/logging.sh"
+source "$( dirname "${BASH_SOURCE[0]}" )/logging.sh"
 
 
 # Check for required tools
@@ -46,7 +48,7 @@ fi
 # Returns exit code 0 if file is valid JSON, 1 othervise.
 function check_json() {
     local f="$1"
-    if cat "$f" | jq --exit-status >/dev/null; then
+    if jq --exit-status "$f" >/dev/null; then
         debug "File is valid JSON, good"
         return 0
     else
@@ -81,12 +83,16 @@ function check_json_string() {
 # Returns exit code 0 if JSON file have all expected fields, 1 othervise.
 function json_complete() {
     local f="$1"
-    local started="$( jq --raw-output .started "$f" )"
+    local started
+    local ended
+
+    started="$( jq --raw-output .started "$f" )"
     if [ -z "$started" ] || [ "$started" = "null" ]; then
         error "File $f does not contain started filed: '$started'"
         return 1
     fi
-    local ended="$( jq --raw-output .ended "$f" )"
+
+    ended="$( jq --raw-output .ended "$f" )"
     if [ -z "$ended" ] || [ "$ended" = "null" ]; then
         error "File $f does not contain ended filed: '$ended'"
         return 1
@@ -105,13 +111,15 @@ function enritch_stuff() {
     local f="$1"
     local key="$2"
     local value="$3"
-    local current_in_file=$( cat "$f" | jq --raw-output "$key" )
+    local current_in_file
+
+    current_in_file=$( jq --raw-output "$key" "$f" )
     if [[ "$current_in_file" == "None" ]]; then
         debug "Adding $key to JSON file"
-        cat $f | jq "$key = \"$value\"" >"$$.json" && mv -f "$$.json" "$f"
+        jq "$key = \"$value\"" "$f" >"$$.json" && mv -f "$$.json" "$f"
     elif [[ "$current_in_file" != "$value" ]]; then
         debug "Changing $key in JSON file"
-        cat $f | jq "$key = \"$value\"" >"$$.json" && mv -f "$$.json" "$f"
+        jq "$key = \"$value\"" "$f" >"$$.json" && mv -f "$$.json" "$f"
     else
         debug "Key $key already in file, skipping enritchment"
     fi
@@ -157,7 +165,7 @@ function prow_download() {
     if [ -e "$out" ]; then
         debug "We already have $out, not overwriting it"
     else
-        shovel.py prow --job-name "$job" download --job-run-id $id --run-name "$run" --artifact-path "$path" --output-path "$out" --record-link "$record_link"
+        shovel.py prow --job-name "$job" download --job-run-id "$id" --run-name "$run" --artifact-path "$path" --output-path "$out" --record-link "$record_link"
         info "Downloaded from Prow: $out"
     fi
 }
@@ -168,6 +176,8 @@ function prow_download() {
 # $1 - Status data file name (JSON file).
 # $2 - Key name from the JSON file we will use to check if this file is already ther in the Horreum.
 # $3 - Horreum label name that corresponds with previous parameter on a Horreum side.
+# $4 - Team owning the test in Horreum (optional, "rhtap-perf-test-team" by default).
+# $5 - Result access setting in Horreum (optional, "PUBLIC" by default).
 #
 # Returns exit code 0 and prints job IDs, one a line.
 function horreum_upload() {
@@ -175,21 +185,22 @@ function horreum_upload() {
     local test_job_matcher="${2:-jobName}"
     local test_job_matcher_label="${3:-jobName}"
 
-    local test_owner="rhtap-perf-test-team"
-    local test_access="PUBLIC"
+    local test_owner="${4:-rhtap-perf-test-team}"
+    local test_access="${5:-PUBLIC}"
 
-    local test_matcher="$( status_data.py --status-data-file "$f" --get $test_job_matcher )"
+    local test_matcher
+    test_matcher="$( status_data.py --status-data-file "$f" --get "$test_job_matcher" )"
 
     debug "Uploading to Horreum: $f with $test_job_matcher_label(a.k.a. $test_job_matcher): $test_matcher"
 
     if $DRY_RUN; then
-        echo shovel.py horreum --base-url "$HORREUM_HOST" --api-token "..." upload --test-name "@name" --input-file "$f" --matcher-field "$test_job_matcher" --matcher-label "$test_job_matcher_label" --start "@started" --end "@ended" --trashed --trashed-workaround-count 20
+        echo shovel.py horreum --base-url "$HORREUM_HOST" --api-token "..." upload --test-name "@name" --owner "$test_owner" --access "$test_access" --input-file "$f" --matcher-field "$test_job_matcher" --matcher-label "$test_job_matcher_label" --start "@started" --end "@ended" --trashed --trashed-workaround-count 20
         echo shovel.py horreum --base-url "$HORREUM_HOST" --api-token "..." result --test-name "@name" --output-file "$f" --start "@started" --end "@ended"
     else
-        shovel.py horreum --base-url "$HORREUM_HOST" --api-token "$HORREUM_API_TOKEN" upload --test-name "@name" --input-file "$f" --matcher-field "$test_job_matcher" --matcher-label "$test_job_matcher_label" --start "@started" --end "@ended" --trashed --trashed-workaround-count 20
+        shovel.py horreum --base-url "$HORREUM_HOST" --api-token "$HORREUM_API_TOKEN" upload --test-name "@name" --owner "$test_owner" --access "$test_access" --input-file "$f" --matcher-field "$test_job_matcher" --matcher-label "$test_job_matcher_label" --start "@started" --end "@ended" --trashed --trashed-workaround-count 20
         info "Uploaded to Horreum: $f"
         shovel.py horreum --base-url "$HORREUM_HOST" --api-token "$HORREUM_API_TOKEN" result --test-name "@name" --output-file "$f" --start "@started" --end "@ended"
-        info "Determined result from Horreum $f: $( jq -r .result $f )"
+        info "Determined result from Horreum $f: $( jq -r .result "$f" )"
     fi
 }
 

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Generic helpers for logging
 
 _YELLOW='\033[1;33m'
