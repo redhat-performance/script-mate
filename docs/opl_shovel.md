@@ -96,6 +96,7 @@ Public: Download artifact from Prow job result.
 * $3 - Prow job run name.
 * $4 - Artifact path in Prow storage.
 * $5 - Output file name where to store the downloaded file.
+* $6 - Where in resulting JSON to store original download path (optional, not used by default)
 
 Returns exit code 0.
 
@@ -110,6 +111,19 @@ Public: Upload JSON data file to Horreum if it is not there already.
 * $3 - Horreum label name that corresponds with previous parameter on a Horreum side.
 
 Returns exit code 0 and prints job IDs, one a line.
+
+
+`opensearch_upload()`
+---------------------
+
+Public: Upload given JSON file to OpenSearch/ElasticSearch.
+
+* $1 - Status data file location.
+* $2 - Field in the JSON we should use to check if document is already there.
+
+This requires `ES_HOST` and `ES_INDEX` variables to be set so we know where to upload.
+
+Returns exit code 0.
 
 
 `resultsdashboard_upload()`
