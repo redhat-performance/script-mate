@@ -2,22 +2,36 @@
 
 # Generic helpers for logging
 
-_YELLOW='\033[1;33m'
-_GREEN='\033[0;32m'
-_ORANGE='\033[0;33m'
-_RED='\033[0;31m'
-_NC='\033[0m'
+# Detect if we are in terminal and can use coloured output
+# https://unix.stackexchange.com/questions/9957/how-to-check-if-bash-can-print-colors
+_COLORS=false
+if [ -t 1 ]; then
+    ncolors=$(tput colors)
+    if [ -n "$ncolors" ] && [ "$ncolors" -ge 8 ]; then
+        _COLORS=true
+        _NORMAL="$(tput sgr0)"
+        _BOLD="$(tput bold)"
+        _YELLOW="$(tput setaf 3)"
+        _GREEN="$(tput setaf 2)"
+        _MAGENTA="$(tput setaf 5)"
+        _RED="$(tput setaf 1)"
+    fi
+fi
 
 # Internal: Logging function doing actual output.
 function _log() {
-    case $1 in
-        DEBUG) c=$_YELLOW;;
-        INFO) c=$_GREEN;;
-        WARNING) c=$_ORANGE;;
-        ERROR|FATAL) c=$_RED;;
-        *) c="";;
-    esac
-    echo -e "${c}$( date -Ins --utc ) ${1} ${2}${_NC}" >&2
+    if $_COLORS; then
+        case $1 in
+            DEBUG) c=$_YELLOW;;
+            INFO) c=$_GREEN;;
+            WARNING) c=$_MAGENTA;;
+            ERROR|FATAL) c=$_RED;;
+            *) c="";;
+        esac
+        echo "${c}$( date -Ins --utc ) ${_BOLD}${1}${_NORMAL}${c} ${2}${_NORMAL}" >&2
+    else
+        echo "$( date -Ins --utc ) ${1} ${2}" >&2
+    fi
 }
 
 # Public: Logging function for "debug" level.
