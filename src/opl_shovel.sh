@@ -48,7 +48,7 @@ fi
 # Returns exit code 0 if file is valid JSON, 1 othervise.
 function check_json() {
     local f="$1"
-    if jq --exit-status . "$f" >/dev/null; then
+    if jq --exit-status . "$f" &>/dev/null; then
         debug "File is valid JSON, good"
         return 0
     else
@@ -67,7 +67,7 @@ function check_json() {
 # Returns exit code 0 if string is valid JSON, 1 othervise.
 function check_json_string() {
     local data="$1"
-    if echo "$data" | jq --exit-status . >/dev/null; then
+    if echo "$data" | jq --exit-status . &>/dev/null; then
         return 0
     else
         error "String is not a valid JSON, bad"
