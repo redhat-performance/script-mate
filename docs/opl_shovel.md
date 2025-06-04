@@ -89,7 +89,14 @@ Returns exit code 0 and prints job IDs, one a line.
 `prow_subjob_list()`
 --------------------
 
-Public: TODO.
+Public: List subjobs of a given job (these are basically just "run-*" directories in Prow job artifacts directory created by "max concurrency" type of jobs).
+
+* $1 - Prow job name.
+* $2 - Prow job run ID.
+* $3 - Prow job run name.
+* $4 - Artifact path in Prow storage.
+
+Returns exit code 0 and prints subjob directory names, one a line.
 
 
 `prow_download()`

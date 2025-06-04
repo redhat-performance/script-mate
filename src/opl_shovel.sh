@@ -137,11 +137,25 @@ function prow_list() {
 }
 
 
-# Public: TODO.
+# Public: List subjobs of a given job (these are basically just "run-*" directories in Prow job artifacts directory created by "max concurrency" type of jobs).
+#
+# $1 - Prow job name.
+# $2 - Prow job run ID.
+# $3 - Prow job run name.
+# $4 - Artifact path in Prow storage.
+#
+# Returns exit code 0 and prints subjob directory names, one a line.
 function prow_subjob_list() {
-    local url="$1"
-    # Note: this `... | rev | cut ... | rev` is just a hack how to get last field
-    shovel.py html links --url "$url" --regexp '.*/run-[^/]+/$' | rev | cut -d '/' -f 1 | rev
+    local job="$1"
+    local id="$2"
+    local run="$3"
+    local path="$4"
+    # Note: this `... | rev | cut ... | rev` is just a hack how to get fields from back
+    # (normally you would just use negative index for that, but cut does not support that)
+    shovel.py html links \
+        --url $PROW_GCSWEB_HOST/gcs/test-platform-results/logs/$job/$id/artifacts/$run/$path/ \
+        --regexp ".*/run-[^/]+/" \
+        | rev | cut -d "/" -f 2 | rev
 }
 
 
