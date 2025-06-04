@@ -2,7 +2,7 @@
 
 # Generic helpers for logging
 
-# Detect if we are in terminal and can use coloured output
+# Internal: Detect if we are in terminal and can use coloured output
 # https://unix.stackexchange.com/questions/9957/how-to-check-if-bash-can-print-colors
 _COLORS=false
 if [ -t 1 ]; then

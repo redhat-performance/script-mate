@@ -1,3 +1,9 @@
+`_COLORS`
+---------
+
+Internal: Detect if we are in terminal and can use coloured output https://unix.stackexchange.com/questions/9957/how-to-check-if-bash-can-print-colors
+
+
 `_log()`
 --------
 
