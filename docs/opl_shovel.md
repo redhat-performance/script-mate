@@ -60,6 +60,7 @@ Returns exit code 0 if string is valid JSON, 1 othervise.
 Public: Checks if given JSON file have main expected fields.
 
 * $1 - File to check.
+* $2... - List of paths to check (optional, default is .started and .ended)
 
 Returns exit code 0 if JSON file have all expected fields, 1 othervise.
 

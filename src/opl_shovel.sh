@@ -79,24 +79,30 @@ function check_json_string() {
 # Public: Checks if given JSON file have main expected fields.
 #
 # $1 - File to check.
+# $2... - List of paths to check (optional, default is .started and .ended)
 #
 # Returns exit code 0 if JSON file have all expected fields, 1 othervise.
 function json_complete() {
     local f="$1"
-    local started
-    local ended
 
-    started="$( jq --raw-output .started "$f" )"
-    if [ -z "$started" ] || [ "$started" = "null" ]; then
-        error "File $f does not contain started filed: '$started'"
-        return 1
+    local check_this
+    if [[ $# -gt 1 ]]; then
+        shift
+        check_this=$@
+    else
+        check_this=".started .ended"
     fi
 
-    ended="$( jq --raw-output .ended "$f" )"
-    if [ -z "$ended" ] || [ "$ended" = "null" ]; then
-        error "File $f does not contain ended filed: '$ended'"
-        return 1
-    fi
+    debug "Checking if $f contains these fields: $check_this"
+
+    local value
+    for key in $check_this; do
+        value="$( jq --raw-output "$key" "$f" )"
+        if [ -z "$value" ] || [ "$value" = "null" ]; then
+            error "File $f does not contain $key filed: '$value'"
+            return 1
+        fi
+    done
 }
 
 
