@@ -139,7 +139,7 @@ function enritch_stuff() {
 # Returns exit code 0 and prints job IDs, one a line.
 function prow_list() {
     local job="$1"
-    shovel.py prow --base-url "$PROW_GCSWEB_HOST/gcs/test-platform-results/logs/" --job-name "$job" list
+    shovel.py prow --base-url "$PROW_GCSWEB_HOST/gcs/test-platform-results-public/logs/" --job-name "$job" list
 }
 
 
@@ -159,7 +159,7 @@ function prow_subjob_list() {
     # Note: this `... | rev | cut ... | rev` is just a hack how to get fields from back
     # (normally you would just use negative index for that, but cut does not support that)
     shovel.py html links \
-        --url $PROW_GCSWEB_HOST/gcs/test-platform-results/logs/$job/$id/artifacts/$run/$path/ \
+        --url $PROW_GCSWEB_HOST/gcs/test-platform-results-public/logs/$job/$id/artifacts/$run/$path/ \
         --regexp ".*/run-[^/]+/" \
         | rev | cut -d "/" -f 2 | rev
 }
